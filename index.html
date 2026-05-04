@@ -1,553 +1,463 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cosas App</title>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --bg: #f5f5f5;
-      --surface: #ffffff;
-      --border: #e0e0e0;
-      --text: #1a1a1a;
-      --muted: #6b7280;
-      --accent: #111827;
-      --accent-hover: #374151;
-      --danger: #ef4444;
-      --radius: 8px;
-      --shadow: 0 1px 3px rgba(0,0,0,.08);
-    }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-    }
-
-    /* ── NAV ── */
-    nav {
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      padding: 0 24px;
-      height: 56px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    nav .brand { font-weight: 600; font-size: 16px; letter-spacing: -.3px; }
-    nav .nav-actions { display: flex; gap: 8px; align-items: center; }
-    #user-info { font-size: 13px; color: var(--muted); }
-
-    /* ── PAGES ── */
-    .page { display: none; }
-    .page.active { display: block; }
-
-    /* ── AUTH ── */
-    #auth-page {
-      display: none;
-      align-items: center;
-      justify-content: center;
-      min-height: calc(100vh - 56px);
-      padding: 24px;
-    }
-    #auth-page.active { display: flex; }
-
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 32px;
-      width: 100%;
-      max-width: 380px;
-    }
-    .card h2 { font-size: 18px; font-weight: 600; margin-bottom: 24px; }
-
-    /* ── FORMS ── */
-    .form-group { margin-bottom: 16px; }
-    label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; color: var(--muted); }
-    input, select {
-      width: 100%;
-      padding: 9px 12px;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      font-size: 14px;
-      color: var(--text);
-      background: var(--surface);
-      transition: border-color .15s;
-      outline: none;
-    }
-    input:focus, select:focus { border-color: var(--accent); }
-
-    /* ── BUTTONS ── */
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      padding: 9px 16px;
-      border-radius: var(--radius);
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      border: none;
-      transition: background .15s, opacity .15s;
-    }
-    .btn:disabled { opacity: .5; cursor: not-allowed; }
-    .btn-primary { background: var(--accent); color: #fff; }
-    .btn-primary:hover:not(:disabled) { background: var(--accent-hover); }
-    .btn-ghost {
-      background: transparent;
-      color: var(--muted);
-      border: 1px solid var(--border);
-    }
-    .btn-ghost:hover { background: var(--bg); }
-    .btn-danger { background: transparent; color: var(--danger); border: 1px solid var(--danger); font-size: 13px; padding: 6px 12px; }
-    .btn-danger:hover { background: #fef2f2; }
-    .btn-full { width: 100%; }
-
-    .toggle-link {
-      text-align: center;
-      margin-top: 16px;
-      font-size: 13px;
-      color: var(--muted);
-    }
-    .toggle-link a { color: var(--accent); cursor: pointer; text-decoration: underline; }
-
-    /* ── ALERT ── */
-    .alert {
-      padding: 10px 14px;
-      border-radius: var(--radius);
-      font-size: 13px;
-      margin-bottom: 16px;
-      display: none;
-    }
-    .alert.show { display: block; }
-    .alert-error { background: #fef2f2; color: var(--danger); border: 1px solid #fecaca; }
-    .alert-success { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
-
-    /* ── MUEBLES PAGE ── */
-    #muebles-page { padding: 32px 24px; max-width: 880px; margin: 0 auto; }
-    #muebles-page.active { display: block; }
-
-    .page-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 28px;
-    }
-    .page-header h1 { font-size: 20px; font-weight: 600; }
-
-    /* ── MODAL ── */
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.35);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 100;
-      padding: 24px;
-    }
-    .modal-backdrop.open { display: flex; }
-    .modal {
-      background: var(--surface);
-      border-radius: var(--radius);
-      box-shadow: 0 8px 30px rgba(0,0,0,.12);
-      padding: 28px;
-      width: 100%;
-      max-width: 400px;
-    }
-    .modal-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 20px;
-    }
-    .modal-header h3 { font-size: 16px; font-weight: 600; }
-    .modal-close {
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 20px;
-      color: var(--muted);
-      line-height: 1;
-    }
-    .modal-close:hover { color: var(--text); }
-
-    /* ── TABLE ── */
-    .table-wrap {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      overflow: hidden;
-    }
-    table { width: 100%; border-collapse: collapse; }
-    th {
-      text-align: left;
-      font-size: 12px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: .5px;
-      color: var(--muted);
-      padding: 12px 16px;
-      background: var(--bg);
-      border-bottom: 1px solid var(--border);
-    }
-    td { padding: 13px 16px; font-size: 14px; border-bottom: 1px solid var(--border); }
-    tr:last-child td { border-bottom: none; }
-    tr:hover td { background: #fafafa; }
-
-    .badge {
-      display: inline-block;
-      padding: 2px 9px;
-      border-radius: 99px;
-      font-size: 12px;
-      font-weight: 500;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      color: var(--text);
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: 48px 16px;
-      color: var(--muted);
-      font-size: 14px;
-    }
-    .empty-state p { margin-top: 8px; }
-
-    .loader {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 40px;
-      color: var(--muted);
-      font-size: 14px;
-      gap: 8px;
-    }
-    .spinner {
-      width: 18px;
-      height: 18px;
-      border: 2px solid var(--border);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin .6s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRUD Cosas - Categorías, Clientes, Ventas</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 20px; background: #f0f2f5; }
+        .container { max-width: 1200px; margin: auto; }
+        
+        /* Tarjetas */
+        .card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .card h2 { margin-top: 0; color: #1a73e8; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px; }
+        .card h3 { color: #333; margin-top: 0; }
+        
+        /* Formularios */
+        .form-group { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; align-items: center; }
+        input, select, button { padding: 10px 15px; border-radius: 8px; font-size: 14px; }
+        input, select { border: 1px solid #ddd; flex: 1; min-width: 150px; }
+        button { background: #1a73e8; color: white; border: none; cursor: pointer; transition: 0.3s; }
+        button:hover { background: #1557b0; }
+        .btn-danger { background: #dc3545; }
+        .btn-danger:hover { background: #bb2d3b; }
+        .btn-success { background: #28a745; }
+        .btn-success:hover { background: #1e7e34; }
+        
+        /* Listas */
+        .lista { display: flex; flex-direction: column; gap: 10px; }
+        .item { background: #f8f9fa; padding: 12px; border-radius: 8px; border-left: 4px solid #1a73e8; }
+        .item button { margin-left: 10px; padding: 5px 10px; font-size: 12px; }
+        
+        /* Header */
+        .header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .logout { background: #dc3545; padding: 8px 20px; }
+        
+        /* Mensajes */
+        .message { position: fixed; top: 20px; right: 20px; padding: 12px 20px; border-radius: 8px; z-index: 1000; animation: fadeOut 3s forwards; }
+        .message.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .message.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        @keyframes fadeOut { 0% { opacity: 1; } 70% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
+        
+        /* Grid para 3 columnas */
+        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; }
+        
+        .badge { background: #e9ecef; padding: 3px 8px; border-radius: 12px; font-size: 12px; margin-left: 10px; }
+        
+        hr { margin: 20px 0; }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <!-- SECCIÓN AUTH (Login/Registro) -->
+        <div id="auth-section" class="card">
+            <h2>📋 Sistema de Gestión</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <h3>📝 Registro</h3>
+                    <input type="text" id="reg-nombre" placeholder="Nombre completo" style="width: 100%; margin-bottom: 10px;">
+                    <input type="email" id="reg-email" placeholder="Email" style="width: 100%; margin-bottom: 10px;">
+                    <input type="password" id="reg-password" placeholder="Contraseña" style="width: 100%; margin-bottom: 10px;">
+                    <button id="btn-register" style="width: 100%;">Registrarse</button>
+                </div>
+                <div>
+                    <h3>🔐 Iniciar Sesión</h3>
+                    <input type="email" id="login-email" placeholder="Email" style="width: 100%; margin-bottom: 10px;">
+                    <input type="password" id="login-password" placeholder="Contraseña" style="width: 100%; margin-bottom: 10px;">
+                    <button id="btn-login" style="width: 100%;">Iniciar Sesión</button>
+                </div>
+            </div>
+        </div>
 
-<!-- ── NAV ── -->
-<nav>
-  <span class="brand">Cosas App</span>
-  <div class="nav-actions">
-    <span id="user-info"></span>
-    <button class="btn btn-ghost" id="btn-logout" style="display:none" onclick="logout()">Salir</button>
-  </div>
-</nav>
+        <!-- SECCIÓN PRINCIPAL (CRUD) - oculta hasta login -->
+        <div id="crud-section" style="display: none;">
+            <div class="header">
+                <h2>🚀 Panel de Control</h2>
+                <button class="logout" id="btn-logout">Cerrar Sesión</button>
+            </div>
 
-<!-- ══════════════════ AUTH PAGE ══════════════════ -->
-<div id="auth-page" class="page active">
-  <div class="card">
-    <!-- LOGIN -->
-    <div id="form-login">
-      <h2>Iniciar sesión</h2>
-      <div class="alert alert-error" id="login-error"></div>
-      <div class="form-group">
-        <label>Email</label>
-        <input type="email" id="login-email" placeholder="correo@ejemplo.com" />
-      </div>
-      <div class="form-group">
-        <label>Contraseña</label>
-        <input type="password" id="login-password" placeholder="••••••" />
-      </div>
-      <button class="btn btn-primary btn-full" id="btn-login" onclick="doLogin()">Entrar</button>
-      <p class="toggle-link">¿No tienes cuenta? <a onclick="switchForm('register')">Regístrate</a></p>
+            <div class="grid-3">
+                <!-- CARD CATEGORÍAS -->
+                <div class="card">
+                    <h2>🏷️ Categorías</h2>
+                    <div class="form-group">
+                        <input type="text" id="cat-nombre" placeholder="Nombre">
+                        <input type="text" id="cat-descripcion" placeholder="Descripción">
+                        <button id="btn-crear-categoria">➕ Agregar</button>
+                    </div>
+                    <h3>Lista de Categorías</h3>
+                    <div id="lista-categorias" class="lista"></div>
+                </div>
+
+                <!-- CARD CLIENTES -->
+                <div class="card">
+                    <h2>👥 Clientes</h2>
+                    <div class="form-group">
+                        <input type="text" id="cli-nombre" placeholder="Nombre">
+                        <input type="email" id="cli-email" placeholder="Email">
+                        <input type="text" id="cli-telefono" placeholder="Teléfono">
+                        <button id="btn-crear-cliente">➕ Agregar</button>
+                    </div>
+                    <h3>Lista de Clientes</h3>
+                    <div id="lista-clientes" class="lista"></div>
+                </div>
+
+                <!-- CARD VENTAS -->
+                <div class="card">
+                    <h2>💰 Ventas</h2>
+                    <div class="form-group">
+                        <select id="venta-cliente-id">
+                            <option value="">Seleccionar cliente</option>
+                        </select>
+                        <input type="number" id="venta-total" placeholder="Total Bs.">
+                        <input type="text" id="venta-items" placeholder="Items (ej: Silla, Mesa)">
+                        <button id="btn-crear-venta">💵 Registrar</button>
+                    </div>
+                    <h3>Historial de Ventas</h3>
+                    <div id="lista-ventas" class="lista"></div>
+                </div>
+            </div>
+
+            <!-- Sección Muebles (la original) -->
+            <div class="card">
+                <h2>🪑 Muebles (CRUD original)</h2>
+                <div class="form-group">
+                    <input type="text" id="mueble-nombre" placeholder="Nombre">
+                    <input type="text" id="mueble-tipo" placeholder="Tipo (cocina, sala, etc)">
+                    <input type="number" id="mueble-costo" placeholder="Costo">
+                    <button id="btn-crear-mueble">➕ Agregar Mueble</button>
+                </div>
+                <h3>Lista de Muebles</h3>
+                <div id="lista-muebles" class="lista"></div>
+            </div>
+        </div>
     </div>
 
-    <!-- REGISTER -->
-    <div id="form-register" style="display:none">
-      <h2>Crear cuenta</h2>
-      <div class="alert alert-error" id="register-error"></div>
-      <div class="alert alert-success" id="register-success"></div>
-      <div class="form-group">
-        <label>Nombre</label>
-        <input type="text" id="reg-nombre" placeholder="Tu nombre" />
-      </div>
-      <div class="form-group">
-        <label>Email</label>
-        <input type="email" id="reg-email" placeholder="correo@ejemplo.com" />
-      </div>
-      <div class="form-group">
-        <label>Contraseña</label>
-        <input type="password" id="reg-password" placeholder="••••••" />
-      </div>
-      <button class="btn btn-primary btn-full" id="btn-register" onclick="doRegister()">Registrarse</button>
-      <p class="toggle-link">¿Ya tienes cuenta? <a onclick="switchForm('login')">Inicia sesión</a></p>
-    </div>
-  </div>
-</div>
+    <div id="message-container"></div>
 
-<!-- ══════════════════ MUEBLES PAGE ══════════════════ -->
-<div id="muebles-page" class="page">
-  <div class="page-header">
-    <h1>Muebles</h1>
-    <button class="btn btn-primary" onclick="openModal()">+ Nuevo mueble</button>
-  </div>
+    <script>
+        // ========== CONFIGURACIÓN ==========
+        const API_AUTH = 'https://crud-cosas-y65y.onrender.com';  // API de autenticación
+        const API_BACKEND = 'http://localhost:3000';              // Tu backend local con endpoints nuevos
 
-  <div id="muebles-list"></div>
-</div>
+        // Mostrar mensajes
+        function showMessage(msg, isError = true) {
+            const container = document.getElementById('message-container');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${isError ? 'error' : 'success'}`;
+            msgDiv.textContent = msg;
+            container.appendChild(msgDiv);
+            setTimeout(() => msgDiv.remove(), 3000);
+        }
 
-<!-- ── MODAL NUEVO MUEBLE ── -->
-<div class="modal-backdrop" id="modal-backdrop">
-  <div class="modal">
-    <div class="modal-header">
-      <h3>Nuevo mueble</h3>
-      <button class="modal-close" onclick="closeModal()">×</button>
-    </div>
-    <div class="alert alert-error" id="mueble-error"></div>
-    <div class="form-group">
-      <label>Nombre</label>
-      <input type="text" id="mueble-nombre" placeholder="Ej. Sofá de sala" />
-    </div>
-    <div class="form-group">
-      <label>Tipo</label>
-      <select id="mueble-tipo">
-        <option value="">Selecciona un tipo</option>
-        <option value="cocina">Cocina</option>
-        <option value="sala">Sala</option>
-        <option value="dormitorio">Dormitorio</option>
-        <option value="oficina">Oficina</option>
-        <option value="baño">Baño</option>
-        <option value="exterior">Exterior</option>
-        <option value="otro">Otro</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label>Costo (Bs.)</label>
-      <input type="number" id="mueble-costo" placeholder="0" min="0" />
-    </div>
-    <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:8px;">
-      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
-      <button class="btn btn-primary" id="btn-crear" onclick="crearMueble()">Crear</button>
-    </div>
-  </div>
-</div>
+        // Obtener token
+        function getToken() {
+            return localStorage.getItem('token');
+        }
 
-<script>
-  const API = 'https://crud-cosas-y65y.onrender.com';
+        // Headers con autenticación
+        function authHeaders() {
+            return {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${getToken()}`
+            };
+        }
 
-  /* ─── helpers ─── */
-  const $ = id => document.getElementById(id);
-  const getToken = () => localStorage.getItem('token');
-  const getEmail = () => localStorage.getItem('email');
+        // ========== REGISTRO Y LOGIN ==========
+        async function register() {
+            const nombre = document.getElementById('reg-nombre').value;
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+            if (!nombre || !email || !password) {
+                showMessage('Todos los campos son requeridos');
+                return;
+            }
+            try {
+                const res = await fetch(`${API_AUTH}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nombre, email, password })
+                });
+                if (res.ok) {
+                    showMessage('Registro exitoso. Ahora inicia sesión', false);
+                    document.getElementById('reg-nombre').value = '';
+                    document.getElementById('reg-email').value = '';
+                    document.getElementById('reg-password').value = '';
+                } else {
+                    const data = await res.json();
+                    showMessage(data.message || 'Error en registro');
+                }
+            } catch (error) {
+                showMessage('Error de conexión');
+            }
+        }
 
-  function showAlert(id, msg) {
-    const el = $(id);
-    el.textContent = msg;
-    el.classList.add('show');
-  }
-  function clearAlert(id) { const el = $(id); el.textContent = ''; el.classList.remove('show'); }
+        async function login() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            if (!email || !password) {
+                showMessage('Email y password requeridos');
+                return;
+            }
+            try {
+                const res = await fetch(`${API_AUTH}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+                if (res.ok && data.token) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('email', email);
+                    showMessage('Login exitoso', false);
+                    mostrarCRUD();
+                    await Promise.all([
+                        listarCategorias(),
+                        listarClientes(),
+                        listarVentas(),
+                        listarMuebles()
+                    ]);
+                } else {
+                    showMessage(data.message || 'Credenciales inválidas');
+                }
+            } catch (error) {
+                showMessage('Error de conexión');
+            }
+        }
 
-  function setLoading(btnId, loading) {
-    const btn = $(btnId);
-    btn.disabled = loading;
-    if (loading) {
-      btn._orig = btn.textContent;
-      btn.innerHTML = '<span class="spinner"></span>';
-    } else {
-      btn.innerHTML = btn._orig || btn.innerHTML;
-    }
-  }
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('email');
+            document.getElementById('auth-section').style.display = 'block';
+            document.getElementById('crud-section').style.display = 'none';
+            showMessage('Sesión cerrada', false);
+        }
 
-  /* ─── routing ─── */
-  function goTo(page) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    $(page + '-page').classList.add('active');
-  }
+        function mostrarCRUD() {
+            document.getElementById('auth-section').style.display = 'none';
+            document.getElementById('crud-section').style.display = 'block';
+        }
 
-  function switchForm(which) {
-    $('form-login').style.display = which === 'login' ? '' : 'none';
-    $('form-register').style.display = which === 'register' ? '' : 'none';
-    clearAlert('login-error');
-    clearAlert('register-error');
-    clearAlert('register-success');
-  }
+        // ========== CRUD CATEGORÍAS ==========
+        async function listarCategorias() {
+            try {
+                const res = await fetch(`${API_BACKEND}/categorias`, {
+                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                });
+                if (res.status === 401) { logout(); return; }
+                const data = await res.json();
+                const container = document.getElementById('lista-categorias');
+                if (data.length === 0) {
+                    container.innerHTML = '<p class="item">No hay categorías</p>';
+                } else {
+                    container.innerHTML = data.map(c => `
+                        <div class="item">
+                            <strong>${c.nombre}</strong> <span class="badge">ID: ${c.id}</span>
+                            <p style="margin: 5px 0 0 0; font-size: 13px; color: #666;">${c.descripcion || 'Sin descripción'}</p>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                showMessage('Error al conectar con backend de categorías');
+            }
+        }
 
-  /* ─── auth ─── */
-  async function doLogin() {
-    clearAlert('login-error');
-    const email = $('login-email').value.trim();
-    const password = $('login-password').value;
-    if (!email || !password) return showAlert('login-error', 'Completa todos los campos.');
-    setLoading('btn-login', true);
-    try {
-      const res = await fetch(API + '/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || data.error || 'Credenciales incorrectas.');
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('email', email);
-      initApp();
-    } catch (e) {
-      showAlert('login-error', e.message);
-    } finally {
-      setLoading('btn-login', false);
-    }
-  }
+        async function crearCategoria() {
+            const nombre = document.getElementById('cat-nombre').value;
+            const descripcion = document.getElementById('cat-descripcion').value;
+            if (!nombre) {
+                showMessage('Nombre de categoría requerido');
+                return;
+            }
+            try {
+                await fetch(`${API_BACKEND}/categorias`, {
+                    method: 'POST',
+                    headers: authHeaders(),
+                    body: JSON.stringify({ nombre, descripcion })
+                });
+                document.getElementById('cat-nombre').value = '';
+                document.getElementById('cat-descripcion').value = '';
+                await listarCategorias();
+                showMessage('Categoría creada', false);
+            } catch (error) {
+                showMessage('Error al crear categoría');
+            }
+        }
 
-  async function doRegister() {
-    clearAlert('register-error');
-    clearAlert('register-success');
-    const nombre = $('reg-nombre').value.trim();
-    const email = $('reg-email').value.trim();
-    const password = $('reg-password').value;
-    if (!nombre || !email || !password) return showAlert('register-error', 'Completa todos los campos.');
-    setLoading('btn-register', true);
-    try {
-      const res = await fetch(API + '/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nombre, email, password })
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || data.error || 'Error al registrarse.');
-      showAlert('register-success', '¡Cuenta creada! Ahora inicia sesión.');
-      $('reg-nombre').value = '';
-      $('reg-email').value = '';
-      $('reg-password').value = '';
-      setTimeout(() => switchForm('login'), 1500);
-    } catch (e) {
-      showAlert('register-error', e.message);
-    } finally {
-      setLoading('btn-register', false);
-    }
-  }
+        // ========== CRUD CLIENTES ==========
+        async function listarClientes() {
+            try {
+                const res = await fetch(`${API_BACKEND}/clientes`, {
+                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                });
+                if (res.status === 401) { logout(); return; }
+                const data = await res.json();
+                const container = document.getElementById('lista-clientes');
+                const select = document.getElementById('venta-cliente-id');
+                
+                if (data.length === 0) {
+                    container.innerHTML = '<p class="item">No hay clientes</p>';
+                    select.innerHTML = '<option value="">No hay clientes disponibles</option>';
+                } else {
+                    container.innerHTML = data.map(c => `
+                        <div class="item">
+                            <strong>${c.nombre}</strong> <span class="badge">${c.email}</span>
+                            <p style="margin: 5px 0 0 0; font-size: 13px; color: #666;">📞 ${c.telefono || 'Sin teléfono'}</p>
+                        </div>
+                    `).join('');
+                    select.innerHTML = '<option value="">Seleccionar cliente</option>' + 
+                        data.map(c => `<option value="${c.id}">${c.nombre} - ${c.email}</option>`).join('');
+                }
+            } catch (error) {
+                showMessage('Error al conectar con backend de clientes');
+            }
+        }
 
-  function logout() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('email');
-    $('user-info').textContent = '';
-    $('btn-logout').style.display = 'none';
-    switchForm('login');
-    goTo('auth');
-  }
+        async function crearCliente() {
+            const nombre = document.getElementById('cli-nombre').value;
+            const email = document.getElementById('cli-email').value;
+            const telefono = document.getElementById('cli-telefono').value;
+            if (!nombre || !email) {
+                showMessage('Nombre y email requeridos');
+                return;
+            }
+            try {
+                await fetch(`${API_BACKEND}/clientes`, {
+                    method: 'POST',
+                    headers: authHeaders(),
+                    body: JSON.stringify({ nombre, email, telefono })
+                });
+                document.getElementById('cli-nombre').value = '';
+                document.getElementById('cli-email').value = '';
+                document.getElementById('cli-telefono').value = '';
+                await listarClientes();
+                showMessage('Cliente creado', false);
+            } catch (error) {
+                showMessage('Error al crear cliente');
+            }
+        }
 
-  /* ─── muebles ─── */
-  async function cargarMuebles() {
-    const list = $('muebles-list');
-    list.innerHTML = '<div class="loader"><span class="spinner"></span> Cargando...</div>';
-    try {
-      const res = await fetch(API + '/muebles', {
-        headers: { 'Authorization': 'Bearer ' + getToken() }
-      });
-      if (res.status === 401) { logout(); return; }
-      const data = await res.json();
-      renderTabla(Array.isArray(data) ? data : (data.data || data.muebles || []));
-    } catch {
-      list.innerHTML = '<div class="empty-state">⚠ No se pudo cargar la lista.</div>';
-    }
-  }
+        // ========== CRUD VENTAS ==========
+        async function listarVentas() {
+            try {
+                const res = await fetch(`${API_BACKEND}/ventas`, {
+                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                });
+                if (res.status === 401) { logout(); return; }
+                const data = await res.json();
+                const container = document.getElementById('lista-ventas');
+                if (data.length === 0) {
+                    container.innerHTML = '<p class="item">No hay ventas registradas</p>';
+                } else {
+                    container.innerHTML = data.map(v => `
+                        <div class="item">
+                            <strong>Venta #${v.id}</strong> <span class="badge">${v.fecha}</span>
+                            <p style="margin: 5px 0 0 0;">Cliente: ${v.clienteNombre || 'ID: ' + v.clienteId}</p>
+                            <p style="margin: 5px 0 0 0;">Total: Bs. ${v.total}</p>
+                            <p style="margin: 5px 0 0 0; font-size: 12px;">Items: ${v.items ? v.items.join(', ') : 'Ninguno'}</p>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                showMessage('Error al conectar con backend de ventas');
+            }
+        }
 
-  function renderTabla(items) {
-    const list = $('muebles-list');
-    if (!items.length) {
-      list.innerHTML = '<div class="table-wrap"><div class="empty-state"><strong>Sin muebles</strong><p>Crea el primero con el botón de arriba.</p></div></div>';
-      return;
-    }
-    const rows = items.map(m => `
-      <tr>
-        <td>${escHtml(m.nombre || '—')}</td>
-        <td><span class="badge">${escHtml(m.tipo || '—')}</span></td>
-        <td>Bs. ${Number(m.costo || 0).toLocaleString('es-BO')}</td>
-        <td style="color:var(--muted);font-size:12px">${m._id || m.id || ''}</td>
-      </tr>`).join('');
-    list.innerHTML = `
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Nombre</th>
-              <th>Tipo</th>
-              <th>Costo</th>
-              <th>ID</th>
-            </tr>
-          </thead>
-          <tbody>${rows}</tbody>
-        </table>
-      </div>`;
-  }
+        async function crearVenta() {
+            const clienteId = document.getElementById('venta-cliente-id').value;
+            const total = parseFloat(document.getElementById('venta-total').value);
+            const itemsRaw = document.getElementById('venta-items').value;
+            if (!clienteId) {
+                showMessage('Seleccione un cliente');
+                return;
+            }
+            if (!total || total <= 0) {
+                showMessage('Total válido requerido');
+                return;
+            }
+            const items = itemsRaw ? itemsRaw.split(',').map(i => i.trim()) : [];
+            try {
+                await fetch(`${API_BACKEND}/ventas`, {
+                    method: 'POST',
+                    headers: authHeaders(),
+                    body: JSON.stringify({ clienteId: parseInt(clienteId), total, items })
+                });
+                document.getElementById('venta-cliente-id').value = '';
+                document.getElementById('venta-total').value = '';
+                document.getElementById('venta-items').value = '';
+                await listarVentas();
+                showMessage('Venta registrada', false);
+            } catch (error) {
+                showMessage('Error al registrar venta');
+            }
+        }
 
-  function escHtml(str) {
-    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
+        // ========== CRUD MUEBLES (original con API de autenticación) ==========
+        async function listarMuebles() {
+            try {
+                const res = await fetch(`${API_AUTH}/muebles`, {
+                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                });
+                if (res.status === 401) { logout(); return; }
+                const data = await res.json();
+                const container = document.getElementById('lista-muebles');
+                if (data.length === 0) {
+                    container.innerHTML = '<p class="item">No hay muebles registrados</p>';
+                } else {
+                    container.innerHTML = data.map(m => `
+                        <div class="item">
+                            <strong>${m.nombre || 'Sin nombre'}</strong> <span class="badge">${m.tipo || 'Sin tipo'}</span>
+                            <p style="margin: 5px 0 0 0;">Costo: Bs. ${m.costo || 0}</p>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                showMessage('Error al listar muebles');
+            }
+        }
 
-  async function crearMueble() {
-    clearAlert('mueble-error');
-    const nombre = $('mueble-nombre').value.trim();
-    const tipo = $('mueble-tipo').value;
-    const costo = $('mueble-costo').value;
-    if (!nombre || !tipo || !costo) return showAlert('mueble-error', 'Completa todos los campos.');
-    setLoading('btn-crear', true);
-    try {
-      const res = await fetch(API + '/muebles', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + getToken()
-        },
-        body: JSON.stringify({ nombre, tipo, costo })
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || data.error || 'Error al crear.');
-      closeModal();
-      cargarMuebles();
-    } catch (e) {
-      showAlert('mueble-error', e.message);
-    } finally {
-      setLoading('btn-crear', false);
-    }
-  }
+        async function crearMueble() {
+            const nombre = document.getElementById('mueble-nombre').value;
+            const tipo = document.getElementById('mueble-tipo').value;
+            const costo = parseFloat(document.getElementById('mueble-costo').value);
+            if (!nombre || !tipo || !costo) {
+                showMessage('Todos los campos del mueble son requeridos');
+                return;
+            }
+            try {
+                await fetch(`${API_AUTH}/muebles`, {
+                    method: 'POST',
+                    headers: authHeaders(),
+                    body: JSON.stringify({ nombre, tipo, costo })
+                });
+                document.getElementById('mueble-nombre').value = '';
+                document.getElementById('mueble-tipo').value = '';
+                document.getElementById('mueble-costo').value = '';
+                await listarMuebles();
+                showMessage('Mueble creado', false);
+            } catch (error) {
+                showMessage('Error al crear mueble');
+            }
+        }
 
-  /* ─── modal ─── */
-  function openModal() {
-    clearAlert('mueble-error');
-    $('mueble-nombre').value = '';
-    $('mueble-tipo').value = '';
-    $('mueble-costo').value = '';
-    $('modal-backdrop').classList.add('open');
-    setTimeout(() => $('mueble-nombre').focus(), 50);
-  }
-  function closeModal() { $('modal-backdrop').classList.remove('open'); }
-  $('modal-backdrop').addEventListener('click', e => { if (e.target === $('modal-backdrop')) closeModal(); });
+        // ========== EVENTOS ==========
+        document.getElementById('btn-register').addEventListener('click', register);
+        document.getElementById('btn-login').addEventListener('click', login);
+        document.getElementById('btn-logout').addEventListener('click', logout);
+        document.getElementById('btn-crear-categoria').addEventListener('click', crearCategoria);
+        document.getElementById('btn-crear-cliente').addEventListener('click', crearCliente);
+        document.getElementById('btn-crear-venta').addEventListener('click', crearVenta);
+        document.getElementById('btn-crear-mueble').addEventListener('click', crearMueble);
 
-  /* ─── Enter key support ─── */
-  ['login-email','login-password'].forEach(id => $(id).addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); }));
-  ['reg-nombre','reg-email','reg-password'].forEach(id => $(id).addEventListener('keydown', e => { if (e.key === 'Enter') doRegister(); }));
-  ['mueble-nombre','mueble-tipo','mueble-costo'].forEach(id => $(id).addEventListener('keydown', e => { if (e.key === 'Enter') crearMueble(); }));
-
-  /* ─── init ─── */
-  function initApp() {
-    const token = getToken();
-    if (token) {
-      $('user-info').textContent = getEmail();
-      $('btn-logout').style.display = '';
-      goTo('muebles');
-      cargarMuebles();
-    } else {
-      goTo('auth');
-    }
-  }
-
-  initApp();
-</script>
+        // Verificar sesión al cargar
+        if (getToken()) {
+            mostrarCRUD();
+            listarCategorias();
+            listarClientes();
+            listarVentas();
+            listarMuebles();
+        }
+    </script>
 </body>
 </html>
